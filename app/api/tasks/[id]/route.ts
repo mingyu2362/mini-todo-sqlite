@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { updateTodoSchema } from "@/lib/validation";
 import { jsonData, jsonError } from "@/lib/api-response";
 
 type RouteContext = { params: Promise<{ id: string }> };
@@ -8,7 +9,7 @@ function parseId(raw: string): number | null {
   return Number.isInteger(id) ? id : null;
 }
 
-export async function PATCH(_request: Request, { params }: RouteContext) {
+export async function PATCH(request: Request, { params }: RouteContext) {
   const { id: rawId } = await params;
   const id = parseId(rawId);
   if (id === null) {
@@ -20,9 +21,21 @@ export async function PATCH(_request: Request, { params }: RouteContext) {
     return jsonError("해당 id의 할 일을 찾을 수 없습니다.", 404);
   }
 
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return jsonError("잘못된 요청입니다.", 400);
+  }
+
+  const result = updateTodoSchema.safeParse(body);
+  if (!result.success) {
+    return jsonError(result.error.issues[0]?.message ?? "잘못된 요청입니다.", 400);
+  }
+
   const updated = await prisma.todo.update({
     where: { id },
-    data: { completed: !todo.completed },
+    data: result.data,
   });
 
   return jsonData(updated);

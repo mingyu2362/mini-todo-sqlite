@@ -11,6 +11,14 @@ function postRequest(body: unknown) {
   });
 }
 
+function patchRequest(body: unknown) {
+  return new Request("http://localhost", {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
+
 function withId(id: string) {
   return { params: Promise.resolve({ id }) };
 }
@@ -28,7 +36,19 @@ describe("POST /api/tasks (US1)", () => {
     const res = await POST(postRequest({ title: "우유 사기" }));
     expect(res.status).toBe(201);
     const body = await res.json();
-    expect(body.data).toMatchObject({ title: "우유 사기", completed: false });
+    expect(body.data).toMatchObject({ title: "우유 사기", completed: false, priority: "MEDIUM" });
+  });
+
+  it("creates a todo with an explicit priority", async () => {
+    const res = await POST(postRequest({ title: "긴급 처리", priority: "HIGH" }));
+    expect(res.status).toBe(201);
+    const body = await res.json();
+    expect(body.data.priority).toBe("HIGH");
+  });
+
+  it("rejects an invalid priority value", async () => {
+    const res = await POST(postRequest({ title: "잘못된 우선순위", priority: "URGENT" }));
+    expect(res.status).toBe(400);
   });
 
   it("rejects an empty title (FR-002)", async () => {
@@ -66,24 +86,62 @@ describe("GET /api/tasks (US2)", () => {
     expect(body.data).toHaveLength(2);
     expect(body.data[0]).toHaveProperty("title");
     expect(body.data[0]).toHaveProperty("completed");
+    expect(body.data[0]).toHaveProperty("priority");
   });
 });
 
 describe("PATCH /api/tasks/:id (US3)", () => {
-  it("toggles completed from false to true and back (FR-005)", async () => {
+  it("sets completed to true and back to false explicitly (FR-005)", async () => {
     const created = await (await POST(postRequest({ title: "토글 대상" }))).json();
     const id = created.data.id as number;
 
-    const toggled = await (await PATCH(new Request("http://localhost"), withId(String(id)))).json();
+    const toggled = await (await PATCH(patchRequest({ completed: true }), withId(String(id)))).json();
     expect(toggled.data.completed).toBe(true);
 
-    const toggledAgain = await (await PATCH(new Request("http://localhost"), withId(String(id)))).json();
+    const toggledAgain = await (
+      await PATCH(patchRequest({ completed: false }), withId(String(id)))
+    ).json();
     expect(toggledAgain.data.completed).toBe(false);
   });
 
   it("returns 404 for a non-existent id (FR-007)", async () => {
     const res = await PATCH(new Request("http://localhost"), withId("999999"));
     expect(res.status).toBe(404);
+  });
+
+  it("updates priority", async () => {
+    const created = await (await POST(postRequest({ title: "우선순위 변경" }))).json();
+    const id = created.data.id as number;
+
+    const res = await PATCH(patchRequest({ priority: "LOW" }), withId(String(id)));
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.data.priority).toBe("LOW");
+  });
+
+  it("updates completed and priority together in one call", async () => {
+    const created = await (await POST(postRequest({ title: "동시 변경" }))).json();
+    const id = created.data.id as number;
+
+    const res = await PATCH(patchRequest({ completed: true, priority: "HIGH" }), withId(String(id)));
+    const body = await res.json();
+    expect(body.data).toMatchObject({ completed: true, priority: "HIGH" });
+  });
+
+  it("rejects an empty body with no fields to update", async () => {
+    const created = await (await POST(postRequest({ title: "빈 요청" }))).json();
+    const id = created.data.id as number;
+
+    const res = await PATCH(patchRequest({}), withId(String(id)));
+    expect(res.status).toBe(400);
+  });
+
+  it("rejects an invalid priority value on update", async () => {
+    const created = await (await POST(postRequest({ title: "잘못된 값" }))).json();
+    const id = created.data.id as number;
+
+    const res = await PATCH(patchRequest({ priority: "URGENT" }), withId(String(id)));
+    expect(res.status).toBe(400);
   });
 });
 

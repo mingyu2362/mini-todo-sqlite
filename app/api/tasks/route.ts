@@ -18,7 +18,7 @@ export async function POST(request: Request) {
   }
 
   const todo = await prisma.todo.create({
-    data: { title: result.data.title },
+    data: { title: result.data.title, priority: result.data.priority },
   });
 
   return jsonData(todo, 201);
