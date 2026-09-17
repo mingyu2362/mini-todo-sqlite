@@ -38,9 +38,9 @@ plan.md의 Project Structure를 따른다 (단일 Next.js 프로젝트):
 
 **Purpose**: 프로젝트 초기화 및 기본 구조 준비
 
-- [ ] T001 `npx prisma init --datasource-provider sqlite`를 실행하여 `prisma/schema.prisma` 초안과 `DATABASE_URL="file:./dev.db"`가 설정된 `.env`를 생성한다
-- [ ] T002 [P] `prisma`, `@prisma/client`, `zod`를 dependencies로, `vitest`를 devDependencies로 `package.json`에 설치하고 `"test": "vitest run"` 스크립트를 추가한다
-- [ ] T003 [P] `.gitignore`에 `prisma/dev.db`, `prisma/dev.db-journal` 등 로컬 SQLite 생성 파일을 추가한다
+- [X] T001 `npx prisma init --datasource-provider sqlite`를 실행하여 `prisma/schema.prisma` 초안과 `DATABASE_URL="file:./dev.db"`가 설정된 `.env`를 생성한다
+- [X] T002 [P] `prisma`, `@prisma/client`, `zod`를 dependencies로, `vitest`를 devDependencies로 `package.json`에 설치하고 `"test": "vitest run"` 스크립트를 추가한다
+- [X] T003 [P] `.gitignore`에 `prisma/dev.db`, `prisma/dev.db-journal` 등 로컬 SQLite 생성 파일을 추가한다
 
 ---
 
@@ -50,11 +50,11 @@ plan.md의 Project Structure를 따른다 (단일 Next.js 프로젝트):
 
 **⚠️ CRITICAL**: 이 단계가 끝나기 전에는 Phase 3 이후를 시작할 수 없다
 
-- [ ] T004 `prisma/schema.prisma`에 `Todo` 모델을 data-model.md대로 정의한다: `id Int @id @default(autoincrement())`, `title String`, `completed Boolean @default(false)`, `createdAt DateTime @default(now())` (depends on T001)
-- [ ] T005 `npx prisma migrate dev --name init`을 실행해 초기 마이그레이션과 `prisma/dev.db`, Prisma Client 타입을 생성한다 (depends on T002, T004)
-- [ ] T006 [P] `lib/prisma.ts`에 `globalThis` 캐싱 기반 Prisma Client 싱글턴을 구현한다 (research.md #3, dev 모드 재평가로 인한 커넥션 누적 방지) (depends on T005)
-- [ ] T007 [P] `lib/validation.ts`에 Zod 스키마를 구현한다: `title`은 trim 후 1자 이상, 최대 200자(data-model.md, FR-002 "제목이 비어 있거나 공백만으로 이루어진 요청 거부", FR-011 "200자 초과 시 거부") (depends on T002)
-- [ ] T008 [P] `lib/api-response.ts`에 성공 `{ "data": ... }` / 실패 `{ "error": { "message": string } }` JSON 응답 헬퍼를 구현한다 (research.md #1, 헌법 원칙 II)
+- [X] T004 `prisma/schema.prisma`에 `Todo` 모델을 data-model.md대로 정의한다: `id Int @id @default(autoincrement())`, `title String`, `completed Boolean @default(false)`, `createdAt DateTime @default(now())` (depends on T001)
+- [X] T005 `npx prisma migrate dev --name init`을 실행해 초기 마이그레이션과 `prisma/dev.db`, Prisma Client 타입을 생성한다 (depends on T002, T004)
+- [X] T006 [P] `lib/prisma.ts`에 `globalThis` 캐싱 기반 Prisma Client 싱글턴을 구현한다 (research.md #3, dev 모드 재평가로 인한 커넥션 누적 방지) (depends on T005)
+- [X] T007 [P] `lib/validation.ts`에 Zod 스키마를 구현한다: `title`은 trim 후 1자 이상, 최대 200자(data-model.md, FR-002 "제목이 비어 있거나 공백만으로 이루어진 요청 거부", FR-011 "200자 초과 시 거부") (depends on T002)
+- [X] T008 [P] `lib/api-response.ts`에 성공 `{ "data": ... }` / 실패 `{ "error": { "message": string } }` JSON 응답 헬퍼를 구현한다 (research.md #1, 헌법 원칙 II)
 
 **Checkpoint**: 이 시점부터 사용자 스토리 구현을 시작할 수 있다
 
@@ -72,11 +72,11 @@ plan.md의 Project Structure를 따른다 (단일 Next.js 프로젝트):
 
 > 구현 전에 실패하는 상태로 먼저 작성한다
 
-- [ ] T009 [US1] `tests/api/tasks.test.ts`에 `POST /api/tasks` 통합 테스트를 작성한다: 정상 제목 → 201 & `completed:false`(FR-001, FR-003), 빈/공백 제목 → 400(FR-002), 200자 초과 제목 → 400(FR-011)
+- [X] T009 [US1] `tests/api/tasks.test.ts`에 `POST /api/tasks` 통합 테스트를 작성한다: 정상 제목 → 201 & `completed:false`(FR-001, FR-003), 빈/공백 제목 → 400(FR-002), 200자 초과 제목 → 400(FR-011)
 
 ### Implementation for User Story 1
 
-- [ ] T010 [US1] `app/api/tasks/route.ts`에 `POST` 핸들러를 구현한다: `lib/validation.ts`로 `title` 검증 → 통과 시 `lib/prisma.ts`로 `completed:false`인 `Todo` 생성 → `lib/api-response.ts`로 201 `{data}` 또는 400 `{error}` 응답 (FR-001, FR-002, FR-003, FR-011) (depends on T006, T007, T008, T009)
+- [X] T010 [US1] `app/api/tasks/route.ts`에 `POST` 핸들러를 구현한다: `lib/validation.ts`로 `title` 검증 → 통과 시 `lib/prisma.ts`로 `completed:false`인 `Todo` 생성 → `lib/api-response.ts`로 201 `{data}` 또는 400 `{error}` 응답 (FR-001, FR-002, FR-003, FR-011) (depends on T006, T007, T008, T009)
 
 **Checkpoint**: User Story 1은 이 시점에 독립적으로 완전히 동작하고 테스트 가능해야 한다 (MVP)
 
@@ -91,11 +91,11 @@ plan.md의 Project Structure를 따른다 (단일 Next.js 프로젝트):
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T011 [US2] `tests/api/tasks.test.ts`에 `GET /api/tasks` 통합 테스트를 추가한다: 항목이 없을 때 `{data:[]}`, 완료/미완료 항목이 섞여 있을 때 각 항목의 `title`/`completed`가 노출되는지 확인 (FR-004) (depends on T009, 같은 파일)
+- [X] T011 [US2] `tests/api/tasks.test.ts`에 `GET /api/tasks` 통합 테스트를 추가한다: 항목이 없을 때 `{data:[]}`, 완료/미완료 항목이 섞여 있을 때 각 항목의 `title`/`completed`가 노출되는지 확인 (FR-004) (depends on T009, 같은 파일)
 
 ### Implementation for User Story 2
 
-- [ ] T012 [US2] `app/api/tasks/route.ts`에 `GET` 핸들러를 구현한다: 모든 `Todo`를 `createdAt` 오름차순으로 조회해 200 `{data: Todo[]}` 응답 (FR-004) (depends on T010, 같은 파일)
+- [X] T012 [US2] `app/api/tasks/route.ts`에 `GET` 핸들러를 구현한다: 모든 `Todo`를 `createdAt` 오름차순으로 조회해 200 `{data: Todo[]}` 응답 (FR-004) (depends on T010, 같은 파일)
 
 **Checkpoint**: User Story 1과 2가 함께 독립적으로 동작해야 한다
 
@@ -110,11 +110,11 @@ plan.md의 Project Structure를 따른다 (단일 Next.js 프로젝트):
 
 ### Tests for User Story 3 ⚠️
 
-- [ ] T013 [US3] `tests/api/tasks.test.ts`에 `PATCH /api/tasks/[id]` 통합 테스트를 추가한다: 존재하는 id → 200 & `completed` 반전(FR-005), 존재하지 않는/이미 삭제된 id → 404(FR-007) (depends on T011, 같은 파일)
+- [X] T013 [US3] `tests/api/tasks.test.ts`에 `PATCH /api/tasks/[id]` 통합 테스트를 추가한다: 존재하는 id → 200 & `completed` 반전(FR-005), 존재하지 않는/이미 삭제된 id → 404(FR-007) (depends on T011, 같은 파일)
 
 ### Implementation for User Story 3
 
-- [ ] T014 [US3] `app/api/tasks/[id]/route.ts`에 `PATCH` 핸들러를 구현한다: id로 `Todo` 조회 → 없으면 `lib/api-response.ts`로 404 `{error}`, 있으면 `completed`를 반전시켜 200 `{data}` 응답 (FR-005, FR-007) (depends on T006, T008)
+- [X] T014 [US3] `app/api/tasks/[id]/route.ts`에 `PATCH` 핸들러를 구현한다: id로 `Todo` 조회 → 없으면 `lib/api-response.ts`로 404 `{error}`, 있으면 `completed`를 반전시켜 200 `{data}` 응답 (FR-005, FR-007) (depends on T006, T008)
 
 **Checkpoint**: User Story 1~3이 함께 독립적으로 동작해야 한다
 
@@ -129,11 +129,11 @@ plan.md의 Project Structure를 따른다 (단일 Next.js 프로젝트):
 
 ### Tests for User Story 4 ⚠️
 
-- [ ] T015 [US4] `tests/api/tasks.test.ts`에 `DELETE /api/tasks/[id]` 통합 테스트를 추가한다: 존재하는 id → 200 & `{data:{id}}`(FR-006), 존재하지 않는/이미 삭제된 id → 404(FR-007) (depends on T013, 같은 파일)
+- [X] T015 [US4] `tests/api/tasks.test.ts`에 `DELETE /api/tasks/[id]` 통합 테스트를 추가한다: 존재하는 id → 200 & `{data:{id}}`(FR-006), 존재하지 않는/이미 삭제된 id → 404(FR-007) (depends on T013, 같은 파일)
 
 ### Implementation for User Story 4
 
-- [ ] T016 [US4] `app/api/tasks/[id]/route.ts`에 `DELETE` 핸들러를 구현한다: id로 `Todo` 조회 → 없으면 404 `{error}`, 있으면 삭제 후 200 `{data:{id}}` 응답 (FR-006, FR-007) (depends on T014, 같은 파일)
+- [X] T016 [US4] `app/api/tasks/[id]/route.ts`에 `DELETE` 핸들러를 구현한다: id로 `Todo` 조회 → 없으면 404 `{error}`, 있으면 삭제 후 200 `{data:{id}}` 응답 (FR-006, FR-007) (depends on T014, 같은 파일)
 
 **Checkpoint**: 모든 사용자 스토리(US1~US4)가 독립적으로 동작해야 한다
 
@@ -143,9 +143,9 @@ plan.md의 Project Structure를 따른다 (단일 Next.js 프로젝트):
 
 **Purpose**: 여러 사용자 스토리에 걸친 마무리 작업
 
-- [ ] T017 [P] `app/page.tsx`에서 `/api/tasks`, `/api/tasks/[id]`를 호출하는 UI를 구현한다: 추가 폼, 목록 렌더링, 항목별 토글/삭제 버튼 (SC-001, SC-002, SC-005) (depends on T010, T012, T014, T016)
-- [ ] T018 [P] `npm run lint`와 `npx tsc --noEmit`(또는 `next build`)을 실행해 `any` 사용/타입 오류가 없는지 확인한다 (헌법 원칙 III, Quality Gates)
-- [ ] T019 quickstart.md의 curl 시나리오와 `npx vitest run`을 실행해 4개 사용자 스토리를 엔드투엔드로 검증한다 (depends on T009-T016, T017)
+- [X] T017 [P] `app/page.tsx`에서 `/api/tasks`, `/api/tasks/[id]`를 호출하는 UI를 구현한다: 추가 폼, 목록 렌더링, 항목별 토글/삭제 버튼 (SC-001, SC-002, SC-005) (depends on T010, T012, T014, T016)
+- [X] T018 [P] `npm run lint`와 `npx tsc --noEmit`(또는 `next build`)을 실행해 `any` 사용/타입 오류가 없는지 확인한다 (헌법 원칙 III, Quality Gates)
+- [X] T019 quickstart.md의 curl 시나리오와 `npx vitest run`을 실행해 4개 사용자 스토리를 엔드투엔드로 검증한다 (depends on T009-T016, T017)
 
 ---
 
